@@ -22,6 +22,7 @@ class GenerateFutoshiki(private val boardSize: Int, private val difficulty: Int)
     fun getHorizontalComparison() : Array<CharArray> = horizontalComparison
     fun getVerticalComparison() : Array<CharArray> = verticalComparison
     fun getPuzzle() : Array<Array<String>> = puzzle
+    fun getPuzzleSize() : Int = puzzle.size
 
     // Generates numbers for futoshiki board
     private fun generateBoard() {
@@ -224,6 +225,7 @@ class GenerateFutoshiki(private val boardSize: Int, private val difficulty: Int)
         var random : Int
         var pi = 0
         var pj : Int
+        var pk : Int
         val numThreshold = when (difficulty) {
             1 -> 30
             2 -> 8
@@ -247,28 +249,36 @@ class GenerateFutoshiki(private val boardSize: Int, private val difficulty: Int)
                 if (random <= numThreshold)
                     puzzle[pi][pj] = board[i][j].toString()
                 else
-                    puzzle[pi][pj] = " "
+                    puzzle[pi][pj] = "x"
 
                 // Print horizontal comparison
                 if (random <= comparisonThreshold && j < boardSize - 1)
                     puzzle[pi][pj+1] = horizontalComparison[i][j].toString()
                 else if (j < boardSize - 1)
-                    puzzle[pi][pj+1] = " "
+                    puzzle[pi][pj+1] = "x"
 
                 pj+=2
             }
             pi++
 
             //Print vertical comparison
-            for (k in 0 until verticalComparison[0].size) {
-                random = Random().nextInt(100)
-                if (random <= comparisonThreshold) {
-                    if (i < boardSize - 1)
-                        puzzle[pi][k] = verticalComparison[i][k].toString()
-                }
-                else {
-                    if (i < boardSize - 1)
-                        puzzle[pi][k] = " "
+            pk = 0
+            for (k in 0 until puzzle.size) {
+                if (i < boardSize - 1)
+                {
+                    if (k % 2 == 0)
+                    {
+                        random = Random().nextInt(100)
+                        if (random <= comparisonThreshold)
+                            puzzle[pi][pk] = verticalComparison[i][k / 2].toString()
+                        else
+                            puzzle[pi][pk] = "x"
+                    }
+                    else
+                    {
+                        puzzle[pi][pk] = "x"
+                    }
+                    pk++
                 }
             }
             pi++
@@ -282,4 +292,5 @@ fun main(args: Array<String>) {
     fs.printBoard()
     fs.printPuzzle()
     println(Arrays.deepToString(fs.getPuzzle()))
+    println(fs.getPuzzleSize())
 }
