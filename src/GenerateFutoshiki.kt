@@ -1,15 +1,29 @@
 import java.util.*
 
-class GenerateFutoshiki(val boardSize: Int) {
-    //val random = Random()
-    //fun rand(from: Int, to: Int) = random.nextInt(to - from) + from
+class GenerateFutoshiki(private val boardSize: Int) {
 
-    fun generateBoard() : Array<IntArray> {
+    private var board : Array<IntArray> = emptyArray()
+    private var horizontalComparison : Array<CharArray> = emptyArray()
+    private var verticalComparison : Array<CharArray> = emptyArray()
+
+    init {
+        board = generateBoard()
+        horizontalComparison = generateHorizontalComparisons()
+        verticalComparison = generateVerticalComparisons()
+    }
+
+    fun generateFutoshiki() : Array<IntArray> {
+        do {
+            randomizeBoard()
+        } while (!isValid())
+        return board
+    }
+
+    private fun generateBoard() : Array<IntArray> {
         val board = Array(boardSize, {IntArray(boardSize)})
         var entry : Int
         for (i in 0 until boardSize) {
             entry = i + 1
-            //entry += i
             for (j in 0 until boardSize) {
                 board[i][j] = entry++
                 if (entry > boardSize) entry = 1
@@ -18,7 +32,39 @@ class GenerateFutoshiki(val boardSize: Int) {
         return board
     }
 
-    fun generateHorizontalComparisons(board : Array<IntArray>) : Array<CharArray> {
+    private fun randomizeBoard() {
+        var random1 : Int
+        var random2 : Int
+        var swap : Int
+        for (i in 0 until boardSize) {
+            random1 = Random().nextInt(boardSize)
+            random2 = Random().nextInt(boardSize)
+            swap = board[i][random1]
+            board[i][random1] = board[i][random2]
+            board[i][random2] = swap
+        }
+    }
+
+    fun isValid() : Boolean {
+        var expectedSum = 0
+        var actualRomSum : Int
+        var actualColSum : Int
+        for (i in 1..boardSize)
+            expectedSum += i
+        for (i in 0 until boardSize) {
+            actualRomSum = 0
+            actualColSum = 0
+            for (j in 0 until boardSize) {
+                actualRomSum += board[i][j]
+                actualColSum += board[j][i]
+            }
+            if (actualColSum != expectedSum || actualRomSum != expectedSum)
+                return false
+        }
+        return true
+    }
+
+    private fun generateHorizontalComparisons() : Array<CharArray> {
         val horizontalComparisonBoard = Array(boardSize, {CharArray(boardSize-1)})
 
         for (i in 0 until boardSize) {
@@ -34,7 +80,7 @@ class GenerateFutoshiki(val boardSize: Int) {
     }
 
 
-    fun generateVerticalComparisons(board : Array<IntArray>) : Array<CharArray> {
+    private fun generateVerticalComparisons() : Array<CharArray> {
         val verticalComparisonBoard = Array(boardSize-1, {CharArray(boardSize)})
 
         for (i in 0 until boardSize-1) {
@@ -49,60 +95,27 @@ class GenerateFutoshiki(val boardSize: Int) {
         return verticalComparisonBoard
     }
 
-    fun printBoard(board: Array<IntArray>,
-                   horiBoard: Array<CharArray>,
-                   vertBoard : Array<CharArray>)
-    {
+    fun printBoard() {
         for (i in 0 until boardSize) {
             for (j in 0 until boardSize) {
                 print(board[i][j])
                 if (j < boardSize - 1)
-                    print(" " + horiBoard[i][j] + " ")
+                    print(" " + horizontalComparison[i][j] + " ")
 
             }
             println()
-            for (k in 0 until horiBoard.size)
+            for (k in 0 until horizontalComparison.size)
                 if (i < boardSize-1)
-                    print(vertBoard[i][k] + "   ")
+                    print(verticalComparison[i][k] + "   ")
             println()
         }
     }
 
-    fun generatePuzzle(board: Array<IntArray>,
-                       horiBoard: Array<CharArray>,
-                       vertBoard : Array<CharArray>)
-                      : Array<CharArray>
-    {
-        val puzzleSize = 2*boardSize
-        val puzzle = Array(puzzleSize, {CharArray(puzzleSize)})
-        //val boardChar = board.map { it.toChar() }
-        var boardIndexI = 0
-        var boardIndexJ = 0
-        var horiIndexI = 0
-        var horiIndexJ = 0
-        for (i in 0 until puzzleSize) {
-            for (j in 0 until puzzleSize step 2) {
-                if (boardIndexJ < board[0].size)
-                    puzzle[i][j] = board[boardIndexI][boardIndexJ++].toChar()
-                if (horiIndexJ < horiBoard[0].size)
-                    puzzle[i][j+1] = horiBoard[horiIndexI][horiIndexJ++]
-            }
-//            for (k in 0 until horiBoard.size-1)
-//                if (i < boardSize-1)
-//                    puzzle[i][0] = vertBoard[i][k]
-//            boardIndexI++
-        }
-        return puzzle
-    }
 }
 
 fun main(args: Array<String>) {
     val futoshiki = GenerateFutoshiki(5)
-    val boardy = futoshiki.generateBoard()
-    val horicomp = futoshiki.generateHorizontalComparisons(boardy)
-    val vertcomp = futoshiki.generateVerticalComparisons(boardy)
-    //println(Arrays.deepToString(vertcomp))
-   // futoshiki.printBoard(boardy, horicomp, vertcomp)
-    val puzzle = futoshiki.generatePuzzle(boardy, horicomp, vertcomp)
-    println(Arrays.deepToString(puzzle))
+    futoshiki.generateFutoshiki()
+    futoshiki.printBoard()
+    println(futoshiki.isValid())
 }
