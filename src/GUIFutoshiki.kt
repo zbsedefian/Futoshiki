@@ -13,8 +13,8 @@ class GUIFutoshiki : JFrame()
         val puzzleSize = fs.getPuzzleSize()
 
         fs.printBoard()
-        labels = Array(puzzleSize) {Array<JLabel>(puzzleSize, JLabel(""))}
-        userPuzzleInput = Array(puzzleSize) { Array<JTextField>(puzzleSize, JTextField("")) }
+        labels = Array(puzzleSize) {Array(puzzleSize) {JLabel("")}}
+        userPuzzleInput = Array(puzzleSize) {Array(puzzleSize) {JTextField("")}}
 
         val puzzlePanel = JPanel()
         puzzlePanel.layout = GridLayout(puzzleSize, puzzleSize)
@@ -80,10 +80,10 @@ class GUIFutoshiki : JFrame()
         submitButton.addActionListener {
             var isSolution = true
             val solution = fs.getSolution()
-            for (i in userPuzzleInput.indices)
+            for (i in 0 until userPuzzleInput.size)
                 for (j in 0 until userPuzzleInput[0].size)
                     if (i % 2 == 0 && j % 2 == 0)
-                        if (solution[i][j] != userPuzzleInput[i][j].text)
+                        if (solution[i][j] != userPuzzleInput[i][j].text.trim())
                             isSolution = false
             if (isSolution)
                 JOptionPane.showMessageDialog(null, "CORRECT! Great job.")
