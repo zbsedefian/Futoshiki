@@ -78,113 +78,6 @@ class GenerateFutoshiki(private val boardSize: Int, private val difficulty: Int)
         return true
     }
 
-    private fun generateRandomBoardWorse()
-    {
-        board = Array(boardSize, {IntArray(boardSize)})
-        var random : Int
-        val listOfNumbers = mutableListOf<Int>()
-        val verticalList = Array(boardSize, { mutableListOf<Int>()})
-
-        for (i in 0 until boardSize)
-        {
-            for (k in 1..boardSize)
-            {
-                listOfNumbers.add(k)
-            }
-
-            for (j in 0 until boardSize)
-            {
-                do {
-                    random = Random().nextInt(boardSize-1)
-                } while(verticalList[j].contains(random) || random >= listOfNumbers.size )
-
-                board[i][j] = listOfNumbers.removeAt(random)
-
-                println(Arrays.deepToString(board))
-
-                if (j == i)
-                {
-                    for(k in 0 until boardSize)
-                    {
-                        if (board[k][j] != 0)
-                            verticalList[i].add(board[k][j])
-                    }
-                    println("vert list: " + Arrays.deepToString(verticalList))
-                }
-
-
-
-            }
-        }
-    }
-
-    // Checks validity of board by placing each element in a list.
-    // Will return false when said list already contains the element.
-    // Attempt at faster solution
-    private fun generateRandomBoardBad()
-    {
-        val horizontalList = mutableListOf<Int>()
-        val verticalList = mutableListOf<Int>()
-        var random : Int
-        var k = 0
-        for (i in 0 until boardSize)
-        {
-            for (j in 0 until boardSize)
-            {
-
-                do {
-                    random = Random().nextInt(boardSize) + 1
-                } while (verticalList.contains(random) || horizontalList.contains(random))
-
-                board[i][j] = random
-                horizontalList.add(random)
-                //verticalList.clear()
-
-                if (i == j)
-                {
-                    for (k in 0 .. j)
-                    if (board[k][i] != 0)
-                        verticalList.add(board[k][i])
-                }
-
-                println("horizontal list: " + horizontalList)
-                println("vertical list: " + verticalList)
-                println(Arrays.deepToString(board))
-            }
-            //k++
-//            for(j in 0 until boardSize)
-//            {
-//                if (board[j][i] != 0)
-//                    verticalList.add(board[j][i])
-//                horizontalList.contains(board[i][j])
-//            }
-//
-//            for (j in i+1 until boardSize)
-//            {
-//                //println(i+1)
-//
-//                println("horizontal list: " + horizontalList)
-//                println("vertical list: " + verticalList)
-//
-//                do {
-//                    random = Random().nextInt(boardSize) + 1
-//                } while (horizontalList.contains(random) && verticalList.contains(random))
-//
-//                board[j][i] = random
-//                verticalList.add(random)
-//
-//
-//            }
-//            k++
-
-            println(Arrays.deepToString(board))
-            horizontalList.clear()
-            verticalList.clear()
-        }
-
-
-    }
-
     // Compares each row value and returns a char array of comparison operators
     private fun generateComparisons()
     {
@@ -218,7 +111,7 @@ class GenerateFutoshiki(private val boardSize: Int, private val difficulty: Int)
             else -> 100
         }
         val comparisonThreshold = when (difficulty) {
-            1 -> 0
+            1 -> 15
             2 -> 11
             3 -> 10
             else -> 100
@@ -281,6 +174,7 @@ class GenerateFutoshiki(private val boardSize: Int, private val difficulty: Int)
     // Console print of the puzzle (not the solution)
     fun printPuzzle(puzzle: Array<Array<String>> = this.puzzle)
     {
+        println()
         val noBoxAroundThese = listOf("x", "<", ">", "^", "v")
         for (i in 0 until puzzle.size)
         {
@@ -310,7 +204,5 @@ fun main(args: Array<String>)
 {
     val fs = GenerateFutoshiki(5, 2)
     fs.printPuzzle()
-    println("\n")
     fs.printSolution()
-    //println(Arrays.deepToString(fs.getPuzzle()))
 }

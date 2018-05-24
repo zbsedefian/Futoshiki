@@ -1,14 +1,14 @@
 import javax.swing.*
 import java.awt.*
 
-class GUIFutoshiki : JFrame()
+class GUIFutoshiki(boardSize: Int = 5, difficulty: Int = 2) : JFrame()
 {
     private val userPuzzleInput: Array<Array<JTextField>>
     private val labels: Array<Array<JLabel>>
 
     init
     {
-        val fs = GenerateFutoshiki(5, 2)
+        val fs = GenerateFutoshiki(boardSize, difficulty)
         val puzzle = fs.getPuzzle()
         val puzzleSize = fs.getPuzzleSize()
 
@@ -60,14 +60,21 @@ class GUIFutoshiki : JFrame()
         val exitButton = JButton("Exit")
         val resetButton = JButton("Reset")
         val submitButton = JButton("Submit")
+        val newGameButton = JButton("New game")
 
         val optionPanel = JPanel()
+        optionPanel.add(newGameButton)
         optionPanel.add(exitButton)
         optionPanel.add(resetButton)
         optionPanel.add(submitButton)
 
         add(puzzlePanel, BorderLayout.CENTER)
         add(optionPanel, BorderLayout.PAGE_END)
+
+        newGameButton.addActionListener {
+            dispose()
+            GUIFutoshiki(boardSize, difficulty)
+        }
 
         exitButton.addActionListener { dispose() }
 
@@ -94,6 +101,7 @@ class GUIFutoshiki : JFrame()
         title = "Futoshiki"
         setSize(450, 450)
         minimumSize = Dimension(350, 350)
+        setLocationRelativeTo(null)
         isResizable = true
         defaultCloseOperation = WindowConstants.EXIT_ON_CLOSE
         isVisible = true
@@ -103,5 +111,5 @@ class GUIFutoshiki : JFrame()
 
 fun main(args: Array<String>)
 {
-    GUIFutoshiki()
+    GUIFutoshiki(4, 1)
 }
