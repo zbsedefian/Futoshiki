@@ -15,7 +15,7 @@ public class FutoshikiFrame extends JFrame {
         String[][] puzzle = fs.getPuzzle();
         int puzzleSize = fs.getPuzzleSize();
 
-        fs.printBoard();
+        fs.printSolution();
 
         labels = new JLabel[puzzleSize][puzzleSize];
         userPuzzleInput = new JTextField[puzzleSize][puzzleSize];

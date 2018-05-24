@@ -12,7 +12,7 @@ class GUIFutoshiki : JFrame()
         val puzzle = fs.getPuzzle()
         val puzzleSize = fs.getPuzzleSize()
 
-        fs.printBoard()
+        fs.printSolution()
         labels = Array(puzzleSize) {Array(puzzleSize) {JLabel("")}}
         userPuzzleInput = Array(puzzleSize) {Array(puzzleSize) {JTextField("")}}
 
@@ -103,5 +103,5 @@ class GUIFutoshiki : JFrame()
 
 fun main(args: Array<String>)
 {
-    val frame = GUIFutoshiki()
+    GUIFutoshiki()
 }
