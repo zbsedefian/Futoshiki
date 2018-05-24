@@ -285,6 +285,36 @@ class GenerateFutoshiki(private val boardSize: Int, private val difficulty: Int)
         }
     }
 
+    fun getSolution() : Array<Array<String>> {
+        var pi = 0
+        var pj : Int
+        var pk : Int
+        for (i in 0 until boardSize) {
+            pj = 0
+            for (j in 0 until boardSize) {
+                puzzle[pi][pj] = board[i][j].toString()
+                if (j < boardSize - 1)
+                    puzzle[pi][pj+1] = horizontalComparison[i][j].toString()
+                pj+=2
+            }
+            pi++
+            //Print vertical comparison
+            pk = 0
+            for (k in 0 until puzzle.size) {
+                if (i < boardSize - 1)
+                {
+                    if (k % 2 == 0)
+                        puzzle[pi][pk] = verticalComparison[i][k / 2].toString()
+                    else
+                        puzzle[pi][pk] = " "
+                    pk++
+                }
+            }
+            pi++
+        }
+        return puzzle
+    }
+
 }
 
 fun main(args: Array<String>) {

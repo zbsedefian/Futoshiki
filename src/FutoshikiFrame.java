@@ -1,24 +1,27 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class FutoshikiFrame extends JFrame {
 
-    private Container contents;
     private JTextField[][] userPuzzleInput;
     private JLabel[][] labels;
 
     public FutoshikiFrame() {
 
-        GenerateFutoshiki fs = new GenerateFutoshiki(5, 2);
+        GenerateFutoshiki fs = new GenerateFutoshiki(3, 1);
 
         String[][] puzzle = fs.getPuzzle();
         int puzzleSize = fs.getPuzzleSize();
 
+        fs.printBoard();
+
         labels = new JLabel[puzzleSize][puzzleSize];
         userPuzzleInput = new JTextField[puzzleSize][puzzleSize];
 
-        contents = getContentPane();
-        contents.setLayout(new GridLayout(puzzleSize, puzzleSize));
+        JPanel puzzlePanel = new JPanel();
+        puzzlePanel.setLayout(new GridLayout(puzzleSize, puzzleSize));
 
         for(int i = 0; i < puzzleSize; i++) {
             for(int j = 0; j < puzzleSize; j++) {
@@ -27,11 +30,15 @@ public class FutoshikiFrame extends JFrame {
                         JTextField textField = new JTextField();
                         textField.setFont(new Font("Courier New", Font.BOLD, 24));
                         textField.setHorizontalAlignment(JTextField.CENTER);
-                        contents.add(textField);
+                        puzzlePanel.add(textField);
+
                         userPuzzleInput[i][j] = textField;
                     } else {
                         labels[i][j] = new JLabel(" ", JLabel.CENTER);
-                        contents.add(labels[i][j]);
+                        puzzlePanel.add(labels[i][j]);
+
+                        JTextField textField = new JTextField("x");
+                        userPuzzleInput[i][j] = textField;
                     }
 
                 }
@@ -39,25 +46,47 @@ public class FutoshikiFrame extends JFrame {
                     labels[i][j] = new JLabel(puzzle[i][j], JLabel.CENTER);
                     labels[i][j].setBackground(Color.black);
                     labels[i][j].setFont(new Font("Courier New", Font.BOLD, 24));
-                    contents.add(labels[i][j]);
+                    puzzlePanel.add(labels[i][j]); //contents.add(labels[i][j]);
+                    JTextField textField = new JTextField(puzzle[i][j]);
+                    userPuzzleInput[i][j] = textField;
                 }
 
             }
         }
 
-//        JButton resetButton = new JButton("Reset");
-//        JButton exitButton = new JButton("Exit");
-//        JPanel resetExitPanel = new JPanel();
-//        resetExitPanel.add(resetButton);
-//        resetExitPanel.add(exitButton);
-//        contents.add(resetExitPanel);
-//        JPanel numberPanel = new JPanel();
-//        SpinnerNumberModel model = new SpinnerNumberModel(9.9, 1, 15, 1);
-//        JSpinner spinner = new JSpinner(model);
-//        numberPanel.add(spinner);
-//
-        //add(contents, BorderLayout.CENTER);
-        //add(resetExitPanel, BorderLayout.PAGE_END);
+        JButton exitButton = new JButton("Exit");
+        JButton resetButton = new JButton("Reset");
+        JButton submitButton = new JButton("Submit");
+
+        JPanel optionPanel = new JPanel();
+        optionPanel.add(exitButton);
+        optionPanel.add(resetButton);
+        optionPanel.add(submitButton);
+
+        add(puzzlePanel, BorderLayout.CENTER);
+        add(optionPanel, BorderLayout.PAGE_END);
+
+        exitButton.addActionListener(e -> dispose());
+
+        resetButton.addActionListener(e -> {
+            for (JTextField[] textFieldArray : userPuzzleInput)
+                for (JTextField textField : textFieldArray)
+                    textField.setText("");
+        });
+
+        submitButton.addActionListener(e -> {
+            boolean isSolution = true;
+            String[][] solution = fs.getSolution();
+            for (int i = 0; i < userPuzzleInput.length; i++)
+                for (int j = 0; j < userPuzzleInput[0].length; j++)
+                    if (i%2==0 && j%2==0)
+                        if (!solution[i][j].equals(userPuzzleInput[i][j].getText()))
+                            isSolution = false;
+            if (isSolution)
+                JOptionPane.showMessageDialog(null,"CORRECT! Great job.");
+            else
+                JOptionPane.showMessageDialog(null,"Incorrect solution.");
+        });
 
         setTitle("Futoshiki");
         setSize(450,450);
@@ -65,8 +94,6 @@ public class FutoshikiFrame extends JFrame {
         setResizable(true);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setVisible(true);
-
-
     }
 
     public static void main(String[] args) {
