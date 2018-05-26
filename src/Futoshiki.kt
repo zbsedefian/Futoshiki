@@ -9,7 +9,8 @@ class GenerateFutoshiki(private val boardSize: Int, private val difficulty: Int)
     private var puzzle = Array(2*boardSize-1, {Array(2*boardSize-1){""}})
     private var solution = Array(2*boardSize-1, {Array(2*boardSize-1){""}})
 
-    init {
+    init
+    {
         generateBoard()
         generateComparisons()
         generatePuzzle()
@@ -31,10 +32,13 @@ class GenerateFutoshiki(private val boardSize: Int, private val difficulty: Int)
             {
                 board[i][j] = entry++
                 if (entry > boardSize)
+                {
                     entry = 1
+                }
             }
         }
-        do {
+        do
+        {
             randomizeBoard()
         } while (!isValid())
     }
@@ -48,7 +52,8 @@ class GenerateFutoshiki(private val boardSize: Int, private val difficulty: Int)
         for (i in 0 until boardSize)
         {
             random1 = Random().nextInt(boardSize)
-            random2 = Random().nextInt(boardSize)
+            do random2 = Random().nextInt(boardSize)
+            while (random1 == random2)
             swap = board[i][random1]
             board[i][random1] = board[i][random2]
             board[i][random2] = swap

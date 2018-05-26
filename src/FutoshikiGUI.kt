@@ -1,20 +1,31 @@
-import javax.swing.*
-import java.awt.*
+import java.awt.Font
+import java.awt.Color
+import java.awt.BorderLayout
+import java.awt.Dimension
+import javax.swing.JLabel
+import javax.swing.WindowConstants
+import javax.swing.JButton
+import javax.swing.JTextField
+import javax.swing.JPanel
+import javax.swing.JFrame
+import java.awt.GridLayout
 
-class GUIFutoshiki(boardSize: Int = 5, difficulty: Int = 2) : JFrame()
+import javax.swing.JOptionPane
+/*
+import java.awt.event.WindowAdapter
+import java.awt.event.WindowEvent
+*/
+
+class FutoshikiGUI(boardSize: Int = 5, difficulty: Int = 2) : JFrame()
 {
-    private val userPuzzleInput: Array<Array<JTextField>>
-    private val labels: Array<Array<JLabel>>
 
     init
     {
         val fs = GenerateFutoshiki(boardSize, difficulty)
         val puzzle = fs.getPuzzle()
         val puzzleSize = fs.getPuzzleSize()
-
-        fs.printSolution()
-        labels = Array(puzzleSize) {Array(puzzleSize) {JLabel("")}}
-        userPuzzleInput = Array(puzzleSize) {Array(puzzleSize) {JTextField("")}}
+        val labels = Array(puzzleSize) {Array(puzzleSize) {JLabel("")}}
+        val userPuzzleInput = Array(puzzleSize) {Array(puzzleSize) {JTextField("")}}
 
         val puzzlePanel = JPanel()
         puzzlePanel.layout = GridLayout(puzzleSize, puzzleSize)
@@ -57,26 +68,34 @@ class GUIFutoshiki(boardSize: Int = 5, difficulty: Int = 2) : JFrame()
             }
         }
 
-        val exitButton = JButton("Exit")
         val resetButton = JButton("Reset")
         val submitButton = JButton("Submit")
+        val settingsButton = JButton("Settings")
         val newGameButton = JButton("New game")
+
+        resetButton.font = Font("Courier New", Font.BOLD, 12)
+        submitButton.font = Font("Courier New", Font.BOLD, 12)
+        settingsButton.font = Font("Courier New", Font.BOLD, 12)
+        newGameButton.font = Font("Courier New", Font.BOLD, 12)
 
         val optionPanel = JPanel()
         optionPanel.add(newGameButton)
-        optionPanel.add(exitButton)
+        optionPanel.add(settingsButton)
         optionPanel.add(resetButton)
         optionPanel.add(submitButton)
 
         add(puzzlePanel, BorderLayout.CENTER)
         add(optionPanel, BorderLayout.PAGE_END)
 
-        newGameButton.addActionListener {
+        settingsButton.addActionListener {
             dispose()
-            GUIFutoshiki(boardSize, difficulty)
+            NewGameGUI()
         }
 
-        exitButton.addActionListener { dispose() }
+        newGameButton.addActionListener {
+            dispose()
+            FutoshikiGUI(boardSize, difficulty)
+        }
 
         resetButton.addActionListener {
             for (textFieldArray in userPuzzleInput)
@@ -93,23 +112,42 @@ class GUIFutoshiki(boardSize: Int = 5, difficulty: Int = 2) : JFrame()
                         if (solution[i][j] != userPuzzleInput[i][j].text.trim())
                             isSolution = false
             if (isSolution)
-                JOptionPane.showMessageDialog(null, "CORRECT! Great job.")
+            {
+                val result = JOptionPane.showOptionDialog(null, "CORRECT! Great job!",
+                        "Solved", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE,
+                        null, null, null)
+                if (result == 0)
+                {
+                    dispose()
+                    NewGameGUI()
+                }
+            }
             else
+            {
                 JOptionPane.showMessageDialog(null, "Incorrect solution.")
+            }
         }
+
+        /*
+        addWindowListener(object : WindowAdapter() {
+            override fun windowClosing(e: WindowEvent) {
+                val reply = JOptionPane.showConfirmDialog(null,
+                        "Are you sure you want to quit?", "Quit", JOptionPane.YES_NO_OPTION)
+                if (reply == JOptionPane.YES_OPTION)
+                    System.exit(0)
+            }
+        })
+        */
 
         title = "Futoshiki"
         setSize(450, 450)
         minimumSize = Dimension(350, 350)
         setLocationRelativeTo(null)
         isResizable = true
+        //Uncomment the line below for confirm on exit
+        //defaultCloseOperation = WindowConstants.DO_NOTHING_ON_CLOSE
         defaultCloseOperation = WindowConstants.EXIT_ON_CLOSE
         isVisible = true
     }
 
-}
-
-fun main(args: Array<String>)
-{
-    GUIFutoshiki(4, 1)
 }
