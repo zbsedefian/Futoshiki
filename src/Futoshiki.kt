@@ -1,6 +1,6 @@
 import java.util.*
 
-class GenerateFutoshiki(private val boardSize: Int, private val difficulty: Int)
+class Futoshiki(private val boardSize: Int = 5, private val difficulty: Int = 2)
 {
     // Properties of futoshiki puzzle & initialization
     private var board = Array(boardSize, {IntArray(boardSize)})
@@ -17,9 +17,11 @@ class GenerateFutoshiki(private val boardSize: Int, private val difficulty: Int)
     }
 
     // Getters
+    fun getBoard() : Array<IntArray> = board
     fun getPuzzle() : Array<Array<String>> = puzzle
     fun getPuzzleSize() : Int = puzzle.size
     fun getSolution() : Array<Array<String>> = solution
+    fun getVerticalComparisons() = verticalComparison
 
     // Generates numbers for futoshiki board
     private fun generateBoard()
@@ -32,15 +34,11 @@ class GenerateFutoshiki(private val boardSize: Int, private val difficulty: Int)
             {
                 board[i][j] = entry++
                 if (entry > boardSize)
-                {
                     entry = 1
-                }
             }
         }
-        do
-        {
-            randomizeBoard()
-        } while (!isValid())
+        do randomizeBoard()
+        while (!isValid())
     }
 
     // Swaps cells at random
@@ -60,9 +58,8 @@ class GenerateFutoshiki(private val boardSize: Int, private val difficulty: Int)
         }
     }
 
-    // Checks validity of board by placing each element in a list.
-    // Will return false when said list already contains the element.
-    private fun isValid() : Boolean
+    // Will return false when list already contains the element.
+    fun isValid(board: Array<IntArray> = this.board) : Boolean
     {
         val horizontalList = mutableListOf<Int>()
         val verticalList = mutableListOf<Int>()
@@ -70,9 +67,7 @@ class GenerateFutoshiki(private val boardSize: Int, private val difficulty: Int)
         {
             for (j in 0 until boardSize)
             {
-                if (horizontalList.contains(board[i][j]))
-                    return false
-                if (verticalList.contains(board[j][i]))
+                if (horizontalList.contains(board[i][j]) || verticalList.contains(board[j][i]))
                     return false
                 horizontalList.add(board[i][j])
                 verticalList.add(board[j][i])
@@ -83,22 +78,24 @@ class GenerateFutoshiki(private val boardSize: Int, private val difficulty: Int)
         return true
     }
 
-    // Compares each row value and returns a char array of comparison operators
+    // Returns a char array of comparison operators
     private fun generateComparisons()
     {
         for (i in 0 until boardSize)
         {
             for (j in 0 until boardSize)
             {
-                if (j < boardSize-1 && board[i][j] < board[i][j+1])
-                    horizontalComparison[i][j] = '<'
-                else if (j < boardSize-1)
-                    horizontalComparison[i][j] = '>'
+                if (j < boardSize-1)
+                    if (board[i][j] < board[i][j+1])
+                        horizontalComparison[i][j] = '<'
+                    else
+                        horizontalComparison[i][j] = '>'
 
-                if (i < boardSize-1 && board[i][j] < board[i+1][j])
-                    verticalComparison[i][j] = '^'
-                else if (i < boardSize-1)
-                    verticalComparison[i][j] = 'v'
+                if (i < boardSize-1)
+                    if (board[i][j] < board[i+1][j])
+                        verticalComparison[i][j] = '^'
+                    else
+                        verticalComparison[i][j] = 'v'
             }
         }
     }
@@ -129,20 +126,22 @@ class GenerateFutoshiki(private val boardSize: Int, private val difficulty: Int)
             {
                 random = Random().nextInt(100)
 
-                // Add number
+                // Add number or x
                 if (random <= numThreshold)
                     puzzle[pi][pj] = board[i][j].toString()
                 else
                     puzzle[pi][pj] = "x"
+
                 solution[pi][pj] = board[i][j].toString()
 
                 // Add horizontal comparison
-                if (j < boardSize - 1)
+                if (j < boardSize-1)
                 {
                     if (random <= comparisonThreshold)
                         puzzle[pi][pj+1] = horizontalComparison[i][j].toString()
                     else
                         puzzle[pi][pj+1] = "x"
+
                     solution[pi][pj+1] = horizontalComparison[i][j].toString()
                 }
                 pj+=2
@@ -153,9 +152,9 @@ class GenerateFutoshiki(private val boardSize: Int, private val difficulty: Int)
             pk = 0
             for (k in 0 until puzzle.size)
             {
-                if (i < boardSize - 1)
+                if (i < boardSize-1)
                 {
-                    if (k % 2 == 0)
+                    if (k%2 == 0)
                     {
                         random = Random().nextInt(100)
                         if (random <= comparisonThreshold)
@@ -186,12 +185,11 @@ class GenerateFutoshiki(private val boardSize: Int, private val difficulty: Int)
             for (j in 0 until puzzle.size)
             {
                 if (!noBoxAroundThese.contains(solution[i][j]))
-                {
-                    if (puzzle[i][j] == "x")
-                        print("| |")
-                    else
-                        print("|" + puzzle[i][j] + "|")
-                }
+                    when {
+                        puzzle[i][j] == "x" -> print("| |")
+                        puzzle[i][j] == "" -> print("   ")
+                        else -> print("|" + puzzle[i][j] + "|")
+                    }
                 else if (puzzle[i][j] != "x")
                     print(" " + puzzle[i][j] + " ")
                 else
@@ -207,7 +205,9 @@ class GenerateFutoshiki(private val boardSize: Int, private val difficulty: Int)
 
 fun main(args: Array<String>)
 {
-    val fs = GenerateFutoshiki(5, 2)
+    val fs = Futoshiki()
     fs.printPuzzle()
     fs.printSolution()
+    val vc = fs.getVerticalComparisons()
+    println(Arrays.deepToString(vc))
 }

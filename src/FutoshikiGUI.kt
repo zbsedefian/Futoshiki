@@ -9,6 +9,7 @@ import javax.swing.JTextField
 import javax.swing.JPanel
 import javax.swing.JFrame
 import java.awt.GridLayout
+import java.util.*
 
 import javax.swing.JOptionPane
 /*
@@ -21,7 +22,7 @@ class FutoshikiGUI(boardSize: Int = 5, difficulty: Int = 2) : JFrame()
 
     init
     {
-        val fs = GenerateFutoshiki(boardSize, difficulty)
+        val fs = Futoshiki(boardSize, difficulty)
         val puzzle = fs.getPuzzle()
         val puzzleSize = fs.getPuzzleSize()
         val labels = Array(puzzleSize) {Array(puzzleSize) {JLabel("")}}
@@ -106,12 +107,30 @@ class FutoshikiGUI(boardSize: Int = 5, difficulty: Int = 2) : JFrame()
         submitButton.addActionListener {
             var isSolution = true
             val solution = fs.getSolution()
+            val userSolution = Array(boardSize, { IntArray(boardSize) })
+            var pi = 0
+            var pj = 0
             for (i in 0 until userPuzzleInput.size)
+            {
+                pj = 0
                 for (j in 0 until userPuzzleInput[0].size)
-                    if (i % 2 == 0 && j % 2 == 0)
-                        if (solution[i][j] != userPuzzleInput[i][j].text.trim())
-                            isSolution = false
-            if (isSolution)
+                {
+                    if (i%2 == 0 && j%2 == 0)
+                    {
+                        try
+                        {
+                            userSolution[pi][pj++] = userPuzzleInput[i][j].text.trim().toInt()
+                        }
+                        catch(e: IllegalArgumentException)
+                        {
+                            println(e.printStackTrace())
+                            println("You entered a non-number.")
+                        }
+                    }
+                }
+                if (i%2 == 0) pi++
+            }
+            if (fs.isValid(userSolution))
             {
                 val result = JOptionPane.showOptionDialog(null, "CORRECT! Great job!",
                         "Solved", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE,
@@ -128,24 +147,11 @@ class FutoshikiGUI(boardSize: Int = 5, difficulty: Int = 2) : JFrame()
             }
         }
 
-        /*
-        addWindowListener(object : WindowAdapter() {
-            override fun windowClosing(e: WindowEvent) {
-                val reply = JOptionPane.showConfirmDialog(null,
-                        "Are you sure you want to quit?", "Quit", JOptionPane.YES_NO_OPTION)
-                if (reply == JOptionPane.YES_OPTION)
-                    System.exit(0)
-            }
-        })
-        */
-
         title = "Futoshiki"
         setSize(450, 450)
         minimumSize = Dimension(350, 350)
         setLocationRelativeTo(null)
         isResizable = true
-        //Uncomment the line below for confirm on exit
-        //defaultCloseOperation = WindowConstants.DO_NOTHING_ON_CLOSE
         defaultCloseOperation = WindowConstants.EXIT_ON_CLOSE
         isVisible = true
     }
