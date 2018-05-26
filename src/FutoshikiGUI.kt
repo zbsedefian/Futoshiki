@@ -9,22 +9,31 @@ import javax.swing.JTextField
 import javax.swing.JPanel
 import javax.swing.JFrame
 import java.awt.GridLayout
-import java.util.*
-
 import javax.swing.JOptionPane
-/*
-import java.awt.event.WindowAdapter
-import java.awt.event.WindowEvent
-*/
 
-class FutoshikiGUI(boardSize: Int = 5, difficulty: Int = 2) : JFrame()
+class FutoshikiGUI(
+        boardSize: Int = 5,
+        difficulty: Int = 2,
+        solution: Array<Array<String>> = emptyArray(),
+        solve: Boolean = false
+) : JFrame()
 {
 
     init
     {
         val fs = Futoshiki(boardSize, difficulty)
-        val puzzle = fs.getPuzzle()
-        val puzzleSize = fs.getPuzzleSize()
+        val puzzle: Array<Array<String>>
+
+        puzzle = if (solve)
+        {
+            solution.copyOf()
+        }
+        else
+        {
+            fs.getPuzzle()
+        }
+
+        val puzzleSize = puzzle.size
         val labels = Array(puzzleSize) {Array(puzzleSize) {JLabel("")}}
         val userPuzzleInput = Array(puzzleSize) {Array(puzzleSize) {JTextField("")}}
 
@@ -72,17 +81,20 @@ class FutoshikiGUI(boardSize: Int = 5, difficulty: Int = 2) : JFrame()
         val resetButton = JButton("Reset")
         val submitButton = JButton("Submit")
         val settingsButton = JButton("Settings")
+        val solveButton = JButton("Solve")
         val newGameButton = JButton("New game")
 
         resetButton.font = Font("Courier New", Font.BOLD, 12)
         submitButton.font = Font("Courier New", Font.BOLD, 12)
         settingsButton.font = Font("Courier New", Font.BOLD, 12)
+        solveButton.font = Font("Courier New", Font.BOLD, 12)
         newGameButton.font = Font("Courier New", Font.BOLD, 12)
 
         val optionPanel = JPanel()
         optionPanel.add(newGameButton)
         optionPanel.add(settingsButton)
         optionPanel.add(resetButton)
+        optionPanel.add(solveButton)
         optionPanel.add(submitButton)
 
         add(puzzlePanel, BorderLayout.CENTER)
@@ -104,32 +116,13 @@ class FutoshikiGUI(boardSize: Int = 5, difficulty: Int = 2) : JFrame()
                     textField.text = ""
         }
 
+        solveButton.addActionListener {
+            dispose()
+            FutoshikiGUI(boardSize, difficulty, fs.getSolution(), true)
+        }
+
         submitButton.addActionListener {
-            var isSolution = true
-            val solution = fs.getSolution()
-            val userSolution = Array(boardSize, { IntArray(boardSize) })
-            var pi = 0
-            var pj = 0
-            for (i in 0 until userPuzzleInput.size)
-            {
-                pj = 0
-                for (j in 0 until userPuzzleInput[0].size)
-                {
-                    if (i%2 == 0 && j%2 == 0)
-                    {
-                        try
-                        {
-                            userSolution[pi][pj++] = userPuzzleInput[i][j].text.trim().toInt()
-                        }
-                        catch(e: IllegalArgumentException)
-                        {
-                            println(e.printStackTrace())
-                            println("You entered a non-number.")
-                        }
-                    }
-                }
-                if (i%2 == 0) pi++
-            }
+            val userSolution = getInput(boardSize, userPuzzleInput)
             if (fs.isValid(userSolution))
             {
                 val result = JOptionPane.showOptionDialog(null, "CORRECT! Great job!",
@@ -154,6 +147,33 @@ class FutoshikiGUI(boardSize: Int = 5, difficulty: Int = 2) : JFrame()
         isResizable = true
         defaultCloseOperation = WindowConstants.EXIT_ON_CLOSE
         isVisible = true
+    }
+
+    private fun getInput(boardSize: Int, userPuzzleInput: Array<Array<JTextField>>) : Array<IntArray>
+    {
+        val userSolution = Array(boardSize, { IntArray(boardSize) })
+        var pi = 0
+        var pj : Int
+        for (i in 0 until userPuzzleInput.size)
+        {
+            pj = 0
+            for (j in 0 until userPuzzleInput[0].size)
+            {
+                if (i%2 == 0 && j%2 == 0)
+                {
+                    try
+                    {
+                        userSolution[pi][pj++] = userPuzzleInput[i][j].text.trim().toInt()
+                    }
+                    catch(e: IllegalArgumentException)
+                    {
+                        println("You entered a non-number at $pi, $pj")
+                    }
+                }
+            }
+            if (i%2 == 0) pi++
+        }
+        return userSolution
     }
 
 }

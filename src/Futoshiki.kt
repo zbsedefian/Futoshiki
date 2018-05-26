@@ -17,11 +17,8 @@ class Futoshiki(private val boardSize: Int = 5, private val difficulty: Int = 2)
     }
 
     // Getters
-    fun getBoard() : Array<IntArray> = board
     fun getPuzzle() : Array<Array<String>> = puzzle
-    fun getPuzzleSize() : Int = puzzle.size
-    fun getSolution() : Array<Array<String>> = solution
-    fun getVerticalComparisons() = verticalComparison
+    fun getSolution(): Array<Array<String>> = solution
 
     // Generates numbers for futoshiki board
     private fun generateBoard()
@@ -61,6 +58,14 @@ class Futoshiki(private val boardSize: Int = 5, private val difficulty: Int = 2)
     // Will return false when list already contains the element.
     fun isValid(board: Array<IntArray> = this.board) : Boolean
     {
+        val topLeft = board[0][0]
+        val topRight = board[0][boardSize-1]
+        val bottomLeft = board[boardSize-1][0]
+        val bottomRight = board[boardSize-1][boardSize-1]
+
+        if (topLeft == bottomRight && topRight == bottomLeft)
+            return false
+
         val horizontalList = mutableListOf<Int>()
         val verticalList = mutableListOf<Int>()
         for (i in 0 until boardSize)
@@ -205,9 +210,8 @@ class Futoshiki(private val boardSize: Int = 5, private val difficulty: Int = 2)
 
 fun main(args: Array<String>)
 {
-    val fs = Futoshiki()
-    fs.printPuzzle()
-    fs.printSolution()
-    val vc = fs.getVerticalComparisons()
-    println(Arrays.deepToString(vc))
+    Futoshiki().apply {
+        printPuzzle()
+        printSolution()
+    }
 }
