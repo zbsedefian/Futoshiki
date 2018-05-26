@@ -19,8 +19,8 @@ class NewGameGUI : JFrame()
 
         val welcomeLabel = JLabel("Welcome to Futoshiki!")
         val sizeLabel = JLabel("Choose puzzle size: ")
-        val difficultyLabel = JLabel("Choose difficulty: ")
         val sizeDropDown = JComboBox(arrayOf("3", "4", "5", "6", "7", "8", "9"))
+        val difficultyLabel = JLabel("Choose difficulty: ")
         val difficultyDropDown = JComboBox(arrayOf("Easy", "Medium", "Hard", "Solved"))
         val confirmButton = JButton("OK")
 
@@ -45,7 +45,7 @@ class NewGameGUI : JFrame()
         add(centerPanel, BorderLayout.CENTER)
         add(bottomPanel, BorderLayout.PAGE_END)
 
-        confirmButton.addActionListener{
+        confirmButton.addActionListener {
             dispose()
             val sizeChoice: Int = Integer.parseInt(sizeDropDown.selectedItem.toString())
             val difficultyChoice = difficultyDropDown.selectedItem.toString()

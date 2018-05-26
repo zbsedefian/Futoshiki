@@ -18,12 +18,12 @@ class FutoshikiGUI(
         solve: Boolean = false
 ) : JFrame()
 {
-
     init
     {
         val fs = Futoshiki(boardSize, difficulty)
         val puzzle: Array<Array<String>>
 
+        // Used when "Solve" button is pressed
         puzzle = if (solve)
         {
             solution.copyOf()
@@ -36,48 +36,11 @@ class FutoshikiGUI(
         val puzzleSize = puzzle.size
         val labels = Array(puzzleSize) {Array(puzzleSize) {JLabel("")}}
         val userPuzzleInput = Array(puzzleSize) {Array(puzzleSize) {JTextField("")}}
+        val puzzlePanel = generatePuzzlePanel(puzzle, labels, userPuzzleInput)
 
-        val puzzlePanel = JPanel()
-        puzzlePanel.layout = GridLayout(puzzleSize, puzzleSize)
+        add(puzzlePanel, BorderLayout.CENTER)
 
-        for (i in 0 until puzzleSize)
-        {
-            for (j in 0 until puzzleSize)
-            {
-                if (puzzle[i][j] == "x")
-                {
-                    if (i % 2 == 0 && j % 2 == 0)
-                    {
-                        val textField = JTextField()
-                        textField.font = Font("Courier New", Font.BOLD, 24)
-                        textField.horizontalAlignment = JTextField.CENTER
-                        puzzlePanel.add(textField)
-
-                        userPuzzleInput[i][j] = textField
-                    }
-                    else
-                    {
-                        labels[i][j] = JLabel(" ", JLabel.CENTER)
-                        puzzlePanel.add(labels[i][j])
-
-                        val textField = JTextField("x")
-                        userPuzzleInput[i][j] = textField
-                    }
-
-                }
-                else
-                {   //insert labels if not blank
-                    labels[i][j] = JLabel(puzzle[i][j], JLabel.CENTER)
-                    labels[i][j].background = Color.black
-                    labels[i][j].font = Font("Courier New", Font.BOLD, 24)
-                    puzzlePanel.add(labels[i][j]) //contents.add(labels[i][j]);
-                    val textField = JTextField(puzzle[i][j])
-                    userPuzzleInput[i][j] = textField
-                }
-
-            }
-        }
-
+        // Buttons
         val resetButton = JButton("Reset")
         val submitButton = JButton("Submit")
         val settingsButton = JButton("Settings")
@@ -90,6 +53,7 @@ class FutoshikiGUI(
         solveButton.font = Font("Courier New", Font.BOLD, 12)
         newGameButton.font = Font("Courier New", Font.BOLD, 12)
 
+        // Button panel
         val optionPanel = JPanel()
         optionPanel.add(newGameButton)
         optionPanel.add(settingsButton)
@@ -97,9 +61,9 @@ class FutoshikiGUI(
         optionPanel.add(solveButton)
         optionPanel.add(submitButton)
 
-        add(puzzlePanel, BorderLayout.CENTER)
         add(optionPanel, BorderLayout.PAGE_END)
 
+        // Button actions
         settingsButton.addActionListener {
             dispose()
             NewGameGUI()
@@ -141,12 +105,61 @@ class FutoshikiGUI(
         }
 
         title = "Futoshiki"
-        setSize(450, 450)
+        setSize(500, 500)
         minimumSize = Dimension(350, 350)
         setLocationRelativeTo(null)
         isResizable = true
         defaultCloseOperation = WindowConstants.EXIT_ON_CLOSE
         isVisible = true
+    }
+
+    private fun generatePuzzlePanel(
+            puzzle: Array<Array<String>>,
+            labels: Array<Array<JLabel>>,
+            userPuzzleInput: Array<Array<JTextField>>
+            ) : JPanel
+    {
+        val puzzlePanel = JPanel()
+        val puzzleSize = puzzle.size
+        puzzlePanel.layout = GridLayout(puzzleSize, puzzleSize)
+        for (i in 0 until puzzleSize)
+        {
+            for (j in 0 until puzzleSize)
+            {
+                if (puzzle[i][j] == "x")
+                {
+                    if (i%2 == 0 && j%2 == 0)
+                    {
+                        val textField = JTextField()
+                        textField.font = Font("Courier New", Font.BOLD, 24)
+                        textField.horizontalAlignment = JTextField.CENTER
+                        puzzlePanel.add(textField)
+
+                        userPuzzleInput[i][j] = textField
+                    }
+                    else
+                    {
+                        labels[i][j] = JLabel(" ", JLabel.CENTER)
+                        puzzlePanel.add(labels[i][j])
+
+                        val textField = JTextField("x")
+                        userPuzzleInput[i][j] = textField
+                    }
+
+                }
+                else
+                {   //insert labels if not blank
+                    labels[i][j] = JLabel(puzzle[i][j], JLabel.CENTER)
+                    labels[i][j].background = Color.black
+                    labels[i][j].font = Font("Courier New", Font.BOLD, 24)
+                    puzzlePanel.add(labels[i][j])
+                    val textField = JTextField(puzzle[i][j])
+                    userPuzzleInput[i][j] = textField
+                }
+
+            }
+        }
+        return puzzlePanel
     }
 
     private fun getInput(boardSize: Int, userPuzzleInput: Array<Array<JTextField>>) : Array<IntArray>
