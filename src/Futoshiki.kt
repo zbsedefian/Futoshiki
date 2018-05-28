@@ -1,63 +1,141 @@
-import java.util.*
+import java.util.Random
+import java.util.stream.IntStream
+import kotlin.system.measureNanoTime
 
 class Futoshiki(private val boardSize: Int = 5, private val difficulty: Int = 2)
 {
     // Properties of futoshiki puzzle & initialization
-    private var board = Array(boardSize, {IntArray(boardSize)})
-    private var horizontalComparison = Array(boardSize, {CharArray(boardSize-1)})
-    private var verticalComparison = Array(boardSize-1, {CharArray(boardSize)})
-    private var puzzle = Array(2*boardSize-1, {Array(2*boardSize-1){""}})
-    private var solution = Array(2*boardSize-1, {Array(2*boardSize-1){""}})
+    private var board = Array(boardSize, { IntArray(boardSize) })
+    private var horizontalComparison = Array(boardSize, { CharArray(boardSize - 1) })
+    private var verticalComparison = Array(boardSize - 1, { CharArray(boardSize) })
+    private var puzzle = Array(2 * boardSize - 1, { Array(2 * boardSize - 1) { "" } })
+    private var solution = Array(2 * boardSize - 1, { Array(2 * boardSize - 1) { "" } })
 
     init
     {
-        generateBoard()
+        //val time = measureNanoTime {
+        do generateBoard()
+        while (!isValidBoard(board))
         generateComparisons()
         generatePuzzle()
+        //}
+        //println("${time*1e-6}ms")
     }
 
     // Getters
-    fun getPuzzle() : Array<Array<String>> = puzzle
+    fun getPuzzle(): Array<Array<String>> = puzzle
     fun getSolution(): Array<Array<String>> = solution
 
-    // Generates numbers for futoshiki board
+    // Resets board to 0's, sets random cells to random values, then solves board
     private fun generateBoard()
     {
-        var entry : Int
+        board = Array(boardSize, { IntArray(boardSize) })
+        iterations = 0
+        initializeBoard()
+        solve()
+        println(iterations)
+    }
+
+    // Places random values in random valid cells
+    private fun initializeBoard()
+    {
+        var randomIndex: Int
+        var randomEntry: Int
         for (i in 0 until boardSize)
         {
-            entry = i + 1
+            randomIndex = Random().nextInt(boardSize)
             for (j in 0 until boardSize)
             {
-                board[i][j] = entry++
-                if (entry > boardSize)
-                    entry = 1
+                if (randomIndex == j || randomIndex == j - 1)
+                {
+                    do randomEntry = Random().nextInt(boardSize) + 1
+                    while (invalidMove(i, j, randomEntry))
+                    board[i][j] = randomEntry
+                }
             }
         }
-        do randomizeBoard()
-        while (!isValid())
     }
 
-    // Swaps cells at random
-    private fun randomizeBoard()
+    private fun invalidMove(x: Int, y: Int, entry: Int) : Boolean
     {
-        var random1 : Int
-        var random2 : Int
-        var swap : Int
+        val horizontalValues = mutableListOf<Int>()
+        val verticalValues = mutableListOf<Int>()
         for (i in 0 until boardSize)
         {
-            random1 = Random().nextInt(boardSize)
-            do random2 = Random().nextInt(boardSize)
-            while (random1 == random2)
-            swap = board[i][random1]
-            board[i][random1] = board[i][random2]
-            board[i][random2] = swap
+            horizontalValues.add(board[x][i])
+            verticalValues.add(board[i][y])
         }
+        if (horizontalValues.contains(entry) || verticalValues.contains(entry))
+            return true
+        return false
     }
 
-    // Will return false when list already contains the element.
-    fun isValid(board: Array<IntArray> = this.board) : Boolean
+    // Recursively enters numbers until board is solved
+    private var iterations: Int = 0 // kill switch
+    private fun solve(): Boolean
     {
+        for (row in 0 until boardSize)
+        {
+            for (column in 0 until boardSize)
+            {
+                if (board[row][column] == 0)
+                {
+                    for (k in 1..boardSize)
+                    {
+                        // Killswitch. Taking too long, so restart.
+                        if (iterations > boardSize*10000)
+                            break
+                        board[row][column] = k
+                        if (isValid(board, row, column) && solve())
+                            return true
+                        board[row][column] = 0
+                        iterations++
+                    }
+                    return false
+                }
+            }
+        }
+        return true
+    }
+
+    // Checks row and column for invalid placement
+    private fun isValid(board: Array<IntArray>, row: Int, column: Int): Boolean =
+            rowConstraint(board, row) && columnConstraint(board, column)
+
+    private fun rowConstraint(board: Array<IntArray>, row: Int): Boolean
+    {
+        val constraint = BooleanArray(boardSize)
+        return IntStream.range(0, boardSize)
+                .allMatch { column -> checkConstraint(board, row, constraint, column) }
+    }
+
+    private fun columnConstraint(board: Array<IntArray>, column: Int): Boolean
+    {
+        val constraint = BooleanArray(boardSize)
+        return IntStream.range(0, boardSize)
+                .allMatch { row -> checkConstraint(board, row, constraint, column) }
+    }
+
+    private fun checkConstraint(board: Array<IntArray>,
+                                row: Int,
+                                constraint: BooleanArray,
+                                column: Int): Boolean
+    {
+        if (board[row][column] != 0)
+        {
+            if (!constraint[board[row][column]-1])
+                constraint[board[row][column]-1] = true
+            else
+                return false
+        }
+        return true
+    }
+
+    // Will return false is board is not well-formed
+    fun isValidBoard(board: Array<IntArray> = this.board) : Boolean
+    {
+        // Invalid if board is of form A...B
+        //                             B...A
         val topLeft = board[0][0]
         val topRight = board[0][boardSize-1]
         val bottomLeft = board[boardSize-1][0]
@@ -66,13 +144,18 @@ class Futoshiki(private val boardSize: Int = 5, private val difficulty: Int = 2)
         if (topLeft == bottomRight && topRight == bottomLeft)
             return false
 
+        // Invalid if board contains >1 of the same value on row or column
         val horizontalList = mutableListOf<Int>()
         val verticalList = mutableListOf<Int>()
         for (i in 0 until boardSize)
         {
             for (j in 0 until boardSize)
             {
-                if (horizontalList.contains(board[i][j]) || verticalList.contains(board[j][i]))
+                if (board[i][j] < 1 ||
+                    board[i][j] > boardSize ||
+                    horizontalList.contains(board[i][j]) ||
+                    verticalList.contains(board[j][i])
+                    )
                     return false
                 horizontalList.add(board[i][j])
                 verticalList.add(board[j][i])
@@ -105,6 +188,7 @@ class Futoshiki(private val boardSize: Int = 5, private val difficulty: Int = 2)
         }
     }
 
+    // Places board and comparison operators in the same array
     private fun generatePuzzle()
     {
         var random : Int
@@ -210,8 +294,8 @@ class Futoshiki(private val boardSize: Int = 5, private val difficulty: Int = 2)
 
 fun main(args: Array<String>)
 {
-    Futoshiki().apply {
-        printPuzzle()
-        printSolution()
+    Futoshiki(9).apply {
+        //printPuzzle()
+        //printSolution()
     }
 }

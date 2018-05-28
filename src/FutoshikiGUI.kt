@@ -16,7 +16,7 @@ class FutoshikiGUI(
         difficulty: Int = 2,
         solution: Array<Array<String>> = emptyArray(),
         solve: Boolean = false
-) : JFrame()
+        ) : JFrame()
 {
     init
     {
@@ -47,11 +47,12 @@ class FutoshikiGUI(
         val solveButton = JButton("Solve")
         val newGameButton = JButton("New game")
 
-        resetButton.font = Font("Courier New", Font.BOLD, 12)
-        submitButton.font = Font("Courier New", Font.BOLD, 12)
-        settingsButton.font = Font("Courier New", Font.BOLD, 12)
-        solveButton.font = Font("Courier New", Font.BOLD, 12)
-        newGameButton.font = Font("Courier New", Font.BOLD, 12)
+        val courierTwelve = Font("Courier New", Font.BOLD, 12)
+        resetButton.font = courierTwelve
+        submitButton.font = courierTwelve
+        settingsButton.font = courierTwelve
+        solveButton.font = courierTwelve
+        newGameButton.font = courierTwelve
 
         // Button panel
         val optionPanel = JPanel()
@@ -87,9 +88,12 @@ class FutoshikiGUI(
 
         submitButton.addActionListener {
             val userSolution = getInput(boardSize, userPuzzleInput)
-            if (fs.isValid(userSolution))
+            // When I can guarantee unique puzzles, change the condition below to userSolution.contentDeepEquals(solution)
+            if (fs.isValidBoard(userSolution))
             {
-                val result = JOptionPane.showOptionDialog(null, "CORRECT! Great job!",
+                val message = JLabel("CORRECT! Great job!")
+                message.font = courierTwelve
+                val result = JOptionPane.showOptionDialog(null, message,
                         "Solved", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE,
                         null, null, null)
                 if (result == 0)
@@ -100,7 +104,9 @@ class FutoshikiGUI(
             }
             else
             {
-                JOptionPane.showMessageDialog(null, "Incorrect solution.")
+                val message = JLabel("Incorrect solution.")
+                message.font = courierTwelve
+                JOptionPane.showMessageDialog(null, message)
             }
         }
 
@@ -167,25 +173,38 @@ class FutoshikiGUI(
         val userSolution = Array(boardSize, { IntArray(boardSize) })
         var pi = 0
         var pj : Int
+        val message = StringBuilder("<html>")
+        var showMessage = false
         for (i in 0 until userPuzzleInput.size)
         {
             pj = 0
             for (j in 0 until userPuzzleInput[0].size)
             {
-                if (i%2 == 0 && j%2 == 0)
+                if (i % 2 == 0 && j % 2 == 0)
                 {
                     try
                     {
                         userSolution[pi][pj++] = userPuzzleInput[i][j].text.trim().toInt()
+                        if (userPuzzleInput[i][j].text.trim().toInt() > boardSize ||
+                                userPuzzleInput[i][j].text.trim().toInt() < 1)
+                        {
+                            message.append("Entries must be between 1 and $boardSize. Check ($pi, $pj).<br/>")
+                            showMessage = true
+                        }
                     }
                     catch(e: IllegalArgumentException)
                     {
-                        println("You entered a non-number at $pi, $pj")
+                        message.append("You didn't enter a number at ($pi, ${pj-1})<br/>")
+                        showMessage = true
                     }
                 }
             }
             if (i%2 == 0) pi++
         }
+        message.append("</html>")
+        val messageLabel = JLabel(message.toString())
+        messageLabel.font = Font("Courier New", Font.BOLD, 12)
+        if(showMessage) JOptionPane.showMessageDialog(null, messageLabel)
         return userSolution
     }
 
