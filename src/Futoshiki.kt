@@ -1,6 +1,6 @@
+import java.io.FileWriter
 import java.util.Random
 import java.util.stream.IntStream
-import kotlin.system.measureNanoTime
 
 class Futoshiki(private val boardSize: Int = 5, private val difficulty: Int = 2)
 {
@@ -10,21 +10,66 @@ class Futoshiki(private val boardSize: Int = 5, private val difficulty: Int = 2)
     private var verticalComparison = Array(boardSize - 1, { CharArray(boardSize) })
     private var puzzle = Array(2 * boardSize - 1, { Array(2 * boardSize - 1) { "" } })
     private var solution = Array(2 * boardSize - 1, { Array(2 * boardSize - 1) { "" } })
+    private var iterations: Int = 0 // Kill switch
 
     init
     {
-        //val time = measureNanoTime {
+        val (lower, upper) = determineBounds()
         do generateBoard()
-        while (!isValidBoard(board))
+        while (!isValidBoard(board) || iterations !in lower..upper)
         generateComparisons()
         generatePuzzle()
-        //}
-        //println("${time*1e-6}ms")
     }
 
     // Getters
     fun getPuzzle(): Array<Array<String>> = puzzle
     fun getSolution(): Array<Array<String>> = solution
+
+    // Determine iteration bounds
+    private fun determineBounds() : Pair<Int, Int>
+    {
+        var bounds = Pair(0, 0)
+
+        when (boardSize) {
+            3 -> bounds = when (difficulty) {
+                1 -> Pair(0, 10)
+                2 -> Pair(11, 17)
+                else -> Pair(18, boardSize*100000)
+            }
+            4 -> bounds = when (difficulty) {
+                1 -> Pair(0, 22)
+                2 -> Pair(23, 45)
+                else -> Pair(46, boardSize*100000)
+            }
+            5 -> bounds = when (difficulty) {
+                1 -> Pair(0, 52)
+                2 -> Pair(53, 369)
+                else -> Pair(370, boardSize*100000)
+            }
+            6 -> bounds = when (difficulty) {
+                1 -> Pair(0, 250)
+                2 -> Pair(251, 2000)
+                else -> Pair(2001, boardSize*100000)
+            }
+            7 -> bounds = when (difficulty) {
+                1 -> Pair(0, 1500)
+                2 -> Pair(1501, 10000)
+                else -> Pair(10000, boardSize*100000)
+            }
+            8 -> bounds = when (difficulty) {
+                1 -> Pair(0, 2000)
+                2 -> Pair(2001, 15000)
+                else -> Pair(15001, boardSize*100000)
+            }
+            9 -> bounds = when (difficulty) {
+                1 -> Pair(0, 3000)
+                2 -> Pair(3001, 20000)
+                else -> Pair(20001, boardSize*100000)
+            }
+        }
+
+        return bounds
+    }
 
     // Resets board to 0's, sets random cells to random values, then solves board
     private fun generateBoard()
@@ -33,7 +78,6 @@ class Futoshiki(private val boardSize: Int = 5, private val difficulty: Int = 2)
         iterations = 0
         initializeBoard()
         solve()
-        println(iterations)
     }
 
     // Places random values in random valid cells
@@ -48,7 +92,13 @@ class Futoshiki(private val boardSize: Int = 5, private val difficulty: Int = 2)
             {
                 if (randomIndex == j || randomIndex == j - 1)
                 {
-                    do randomEntry = Random().nextInt(boardSize) + 1
+                    do
+                    {
+                        randomEntry = Random().nextInt(boardSize) + 1
+                        iterations++
+                        if(iterations > boardSize*100)
+                            break
+                    }
                     while (invalidMove(i, j, randomEntry))
                     board[i][j] = randomEntry
                 }
@@ -71,7 +121,6 @@ class Futoshiki(private val boardSize: Int = 5, private val difficulty: Int = 2)
     }
 
     // Recursively enters numbers until board is solved
-    private var iterations: Int = 0 // kill switch
     private fun solve(): Boolean
     {
         for (row in 0 until boardSize)
@@ -82,7 +131,7 @@ class Futoshiki(private val boardSize: Int = 5, private val difficulty: Int = 2)
                 {
                     for (k in 1..boardSize)
                     {
-                        // Killswitch. Taking too long, so restart.
+                        // Kill switch. Taking too long, so restart.
                         if (iterations > boardSize*10000)
                             break
                         board[row][column] = k
@@ -99,6 +148,7 @@ class Futoshiki(private val boardSize: Int = 5, private val difficulty: Int = 2)
     }
 
     // Checks row and column for invalid placement
+    // The following 4 methods referenced http://www.baeldung.com/java-sudoku
     private fun isValid(board: Array<IntArray>, row: Int, column: Int): Boolean =
             rowConstraint(board, row) && columnConstraint(board, column)
 
@@ -198,13 +248,13 @@ class Futoshiki(private val boardSize: Int = 5, private val difficulty: Int = 2)
         val numThreshold = when (difficulty) {
             1 -> 30
             2 -> 8
-            3 -> 4
+            3 -> 7
             else -> 100
         }
         val comparisonThreshold = when (difficulty) {
             1 -> 15
-            2 -> 11
-            3 -> 10
+            2 -> 13
+            3 -> 12
             else -> 100
         }
 
@@ -290,12 +340,4 @@ class Futoshiki(private val boardSize: Int = 5, private val difficulty: Int = 2)
 
     // Console print of the solution
     fun printSolution() = printPuzzle(solution)
-}
-
-fun main(args: Array<String>)
-{
-    Futoshiki(9).apply {
-        //printPuzzle()
-        //printSolution()
-    }
 }

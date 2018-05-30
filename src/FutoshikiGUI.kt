@@ -1,14 +1,10 @@
-import java.awt.Font
-import java.awt.Color
-import java.awt.BorderLayout
-import java.awt.Dimension
+import java.awt.*
 import javax.swing.JLabel
 import javax.swing.WindowConstants
 import javax.swing.JButton
 import javax.swing.JTextField
 import javax.swing.JPanel
 import javax.swing.JFrame
-import java.awt.GridLayout
 import javax.swing.JOptionPane
 
 class FutoshikiGUI(
@@ -156,7 +152,7 @@ class FutoshikiGUI(
                 else
                 {   //insert labels if not blank
                     labels[i][j] = JLabel(puzzle[i][j], JLabel.CENTER)
-                    labels[i][j].background = Color.black
+                    labels[i][j].background = Color.BLACK
                     labels[i][j].font = Font("Courier New", Font.BOLD, 24)
                     puzzlePanel.add(labels[i][j])
                     val textField = JTextField(puzzle[i][j])
