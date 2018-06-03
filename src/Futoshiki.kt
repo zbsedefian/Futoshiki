@@ -1,4 +1,3 @@
-import java.io.FileWriter
 import java.util.Random
 import java.util.stream.IntStream
 
@@ -10,7 +9,7 @@ class Futoshiki(private val boardSize: Int = 5, private val difficulty: Int = 2)
     private var verticalComparison = Array(boardSize - 1, { CharArray(boardSize) })
     private var puzzle = Array(2 * boardSize - 1, { Array(2 * boardSize - 1) { "" } })
     private var solution = Array(2 * boardSize - 1, { Array(2 * boardSize - 1) { "" } })
-    private var iterations: Int = 0 // Kill switch
+    var iterations: Int = 0 // Kill switch
 
     init
     {
@@ -28,7 +27,7 @@ class Futoshiki(private val boardSize: Int = 5, private val difficulty: Int = 2)
     // Determine iteration bounds
     private fun determineBounds() : Pair<Int, Int>
     {
-        var bounds = Pair(0, 0)
+        val bounds : Pair<Int, Int>
 
         when (boardSize) {
             3 -> bounds = when (difficulty) {
@@ -61,7 +60,7 @@ class Futoshiki(private val boardSize: Int = 5, private val difficulty: Int = 2)
                 2 -> Pair(2001, 15000)
                 else -> Pair(15001, boardSize*100000)
             }
-            9 -> bounds = when (difficulty) {
+            else -> bounds = when (difficulty) {
                 1 -> Pair(0, 3000)
                 2 -> Pair(3001, 20000)
                 else -> Pair(20001, boardSize*100000)
@@ -98,8 +97,7 @@ class Futoshiki(private val boardSize: Int = 5, private val difficulty: Int = 2)
                         iterations++
                         if(iterations > boardSize*100)
                             break
-                    }
-                    while (invalidMove(i, j, randomEntry))
+                    } while (invalidMove(i, j, randomEntry))
                     board[i][j] = randomEntry
                 }
             }
@@ -166,10 +164,7 @@ class Futoshiki(private val boardSize: Int = 5, private val difficulty: Int = 2)
                 .allMatch { row -> checkConstraint(board, row, constraint, column) }
     }
 
-    private fun checkConstraint(board: Array<IntArray>,
-                                row: Int,
-                                constraint: BooleanArray,
-                                column: Int): Boolean
+    private fun checkConstraint(board: Array<IntArray>, row: Int, constraint: BooleanArray, column: Int): Boolean
     {
         if (board[row][column] != 0)
         {
@@ -182,10 +177,16 @@ class Futoshiki(private val boardSize: Int = 5, private val difficulty: Int = 2)
     }
 
     // Will return false is board is not well-formed
-    fun isValidBoard(board: Array<IntArray> = this.board) : Boolean
+    fun isValidBoard(board: Array<IntArray> = this.board) : Boolean =
+        validSize(board) && checkABBAForm(board)  && checkRepetition(board)
+
+    // Input size should equal object's size
+    private fun validSize(board: Array<IntArray> = this.board) : Boolean = board.size == boardSize
+
+    // Invalid if board is of form A...B
+    //                             B...A
+    private fun checkABBAForm(board: Array<IntArray> = this.board) : Boolean
     {
-        // Invalid if board is of form A...B
-        //                             B...A
         val topLeft = board[0][0]
         val topRight = board[0][boardSize-1]
         val bottomLeft = board[boardSize-1][0]
@@ -194,7 +195,12 @@ class Futoshiki(private val boardSize: Int = 5, private val difficulty: Int = 2)
         if (topLeft == bottomRight && topRight == bottomLeft)
             return false
 
-        // Invalid if board contains >1 of the same value on row or column
+        return true
+    }
+
+    // Invalid if board contains >1 of the same value on row or column
+    private fun checkRepetition(board: Array<IntArray> = this.board) : Boolean
+    {
         val horizontalList = mutableListOf<Int>()
         val verticalList = mutableListOf<Int>()
         for (i in 0 until boardSize)
@@ -202,10 +208,10 @@ class Futoshiki(private val boardSize: Int = 5, private val difficulty: Int = 2)
             for (j in 0 until boardSize)
             {
                 if (board[i][j] < 1 ||
-                    board[i][j] > boardSize ||
-                    horizontalList.contains(board[i][j]) ||
-                    verticalList.contains(board[j][i])
-                    )
+                        board[i][j] > boardSize ||
+                        horizontalList.contains(board[i][j]) ||
+                        verticalList.contains(board[j][i])
+                )
                     return false
                 horizontalList.add(board[i][j])
                 verticalList.add(board[j][i])
@@ -314,6 +320,7 @@ class Futoshiki(private val boardSize: Int = 5, private val difficulty: Int = 2)
         }
     }
 
+    /*
     // Console print of the puzzle (not the solution)
     fun printPuzzle(puzzle: Array<Array<String>> = this.puzzle)
     {
@@ -340,4 +347,5 @@ class Futoshiki(private val boardSize: Int = 5, private val difficulty: Int = 2)
 
     // Console print of the solution
     fun printSolution() = printPuzzle(solution)
+    */
 }

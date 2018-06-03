@@ -1,4 +1,8 @@
-import java.awt.*
+import java.awt.Color
+import java.awt.GridLayout
+import java.awt.Dimension
+import java.awt.Font
+import java.awt.BorderLayout
 import javax.swing.JLabel
 import javax.swing.WindowConstants
 import javax.swing.JButton
@@ -102,7 +106,10 @@ class FutoshikiGUI(
             {
                 val message = JLabel("Incorrect solution.")
                 message.font = courierTwelve
-                JOptionPane.showMessageDialog(null, message)
+                JOptionPane.showOptionDialog(null, message,
+                        "Unsolved", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE,
+                        null, null, null)
+                //JOptionPane.showMessageDialog(null, message)
             }
         }
 

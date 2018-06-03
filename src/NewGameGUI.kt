@@ -1,12 +1,12 @@
 import java.awt.Font
 import java.awt.BorderLayout
+import java.awt.GridLayout
 import javax.swing.JLabel
 import javax.swing.WindowConstants
 import javax.swing.JButton
 import javax.swing.JComboBox
 import javax.swing.JPanel
 import javax.swing.JFrame
-import java.awt.GridLayout
 
 class NewGameGUI : JFrame()
 {
